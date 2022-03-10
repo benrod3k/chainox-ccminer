@@ -5,10 +5,10 @@ __device__ __forceinline__ void to_bitslice_quad(uint32_t *input, uint32_t *outp
     uint32_t other[8];
 #pragma unroll 8
     for (int i = 0; i < 8; i++) {
-        input[i] =__shfl((int)input[i], n ^ (3*(n >=1 && n <=2)), 4);
-        other[i] =__shfl((int)input[i], (threadIdx.x + 1) % 4, 4);
-        input[i] = __shfl((int)input[i], threadIdx.x & 2, 4);
-        other[i] = __shfl((int)other[i], threadIdx.x & 2, 4);
+        input[i] =__shfl_sync(0xFFFFFFFF, (int)input[i], n ^ (3*(n >=1 && n <=2)), 4);
+        other[i] =__shfl_sync(0xFFFFFFFF, (int)input[i], (threadIdx.x + 1) % 4, 4);
+        input[i] = __shfl_sync(0xFFFFFFFF, (int)input[i], threadIdx.x & 2, 4);
+        other[i] = __shfl_sync(0xFFFFFFFF, (int)other[i], threadIdx.x & 2, 4);
         if (threadIdx.x & 1) {
             input[i] = __byte_perm(input[i], 0, 0x1032);
             other[i] = __byte_perm(other[i], 0, 0x1032);
@@ -411,8 +411,8 @@ __device__ __forceinline__ void from_bitslice_quad(uint32_t *input, uint32_t *ou
 #pragma unroll 8
     for (int i = 0; i < 16; i+=2) {
         if (threadIdx.x & 1) output[i] = __byte_perm(output[i], 0, 0x1032);
-        output[i] = __byte_perm(output[i], __shfl((int)output[i], (threadIdx.x+1)%4, 4), 0x7610);
-        output[i+1] = __shfl((int)output[i], (threadIdx.x+2)%4, 4);
+        output[i] = __byte_perm(output[i], __shfl_sync(0xFFFFFFFF, (int)output[i], (threadIdx.x+1)%4, 4), 0x7610);
+        output[i+1] = __shfl_sync(0xFFFFFFFF, (int)output[i], (threadIdx.x+2)%4, 4);
         if ((threadIdx.x % 4) != 0) output[i] = output[i+1] = 0;
     }
 }

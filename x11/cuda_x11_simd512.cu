@@ -210,8 +210,8 @@ y[i] = EXTRA_REDUCE_S(y[i]); \
     // BUTTERFLY( 2, 6, 4);
     // BUTTERFLY( 3, 7, 6);
     {
-      u= __shfl((int)y[0],  (threadIdx.x&3),8); // 0,1,2,3  0,1,2,3
-      v= __shfl((int)y[0],4+(threadIdx.x&3),8); // 4,5,6,7  4,5,6,7
+      u= __shfl_sync(0xFFFFFFFF, (int)y[0],  (threadIdx.x&3),8); // 0,1,2,3  0,1,2,3
+      v= __shfl_sync(0xFFFFFFFF, (int)y[0],4+(threadIdx.x&3),8); // 4,5,6,7  4,5,6,7
       y[0] = ((threadIdx.x&7) < 4) ? (u+v) : ((u-v) << (2*(threadIdx.x&3)));
     }
 
@@ -220,8 +220,8 @@ y[i] = EXTRA_REDUCE_S(y[i]); \
     // BUTTERFLY(10, 14, 4);
     // BUTTERFLY(11, 15, 6);
     {
-      u= __shfl((int)y[1],  (threadIdx.x&3),8); // 8,9,10,11    8,9,10,11
-      v= __shfl((int)y[1],4+(threadIdx.x&3),8); // 12,13,14,15  12,13,14,15
+      u= __shfl_sync(0xFFFFFFFF, (int)y[1],  (threadIdx.x&3),8); // 8,9,10,11    8,9,10,11
+      v= __shfl_sync(0xFFFFFFFF, (int)y[1],4+(threadIdx.x&3),8); // 12,13,14,15  12,13,14,15
       y[1] = ((threadIdx.x&7) < 4) ? (u+v) : ((u-v) << (2*(threadIdx.x&3)));
     }
 
@@ -239,8 +239,8 @@ y[i] = EXTRA_REDUCE_S(y[i]); \
     // BUTTERFLY( 4, 6, 0);
     // BUTTERFLY( 5, 7, 4);
     {
-      u= __shfl((int)y[0],  (threadIdx.x&5),8); // 0,1,0,1  4,5,4,5
-      v= __shfl((int)y[0],2+(threadIdx.x&5),8); // 2,3,2,3  6,7,6,7
+      u= __shfl_sync(0xFFFFFFFF, (int)y[0],  (threadIdx.x&5),8); // 0,1,0,1  4,5,4,5
+      v= __shfl_sync(0xFFFFFFFF, (int)y[0],2+(threadIdx.x&5),8); // 2,3,2,3  6,7,6,7
       y[0] = ((threadIdx.x&3) < 2) ? (u+v) : ((u-v) << (4*(threadIdx.x&1)));
     }
 
@@ -249,8 +249,8 @@ y[i] = EXTRA_REDUCE_S(y[i]); \
     // BUTTERFLY(12, 14, 0);
     // BUTTERFLY(13, 15, 4);
     {
-      u= __shfl((int)y[1],  (threadIdx.x&5),8); // 8,9,8,9      12,13,12,13
-      v= __shfl((int)y[1],2+(threadIdx.x&5),8); // 10,11,10,11  14,15,14,15
+      u= __shfl_sync(0xFFFFFFFF, (int)y[1],  (threadIdx.x&5),8); // 8,9,8,9      12,13,12,13
+      v= __shfl_sync(0xFFFFFFFF, (int)y[1],2+(threadIdx.x&5),8); // 10,11,10,11  14,15,14,15
       y[1] = ((threadIdx.x&3) < 2) ? (u+v) : ((u-v) << (4*(threadIdx.x&1)));
     }
 
@@ -259,8 +259,8 @@ y[i] = EXTRA_REDUCE_S(y[i]); \
     // BUTTERFLY( 4, 5, 0);
     // BUTTERFLY( 6, 7, 0);
     {
-      u= __shfl((int)y[0],  (threadIdx.x&6),8); // 0,0,2,2      4,4,6,6
-      v= __shfl((int)y[0],1+(threadIdx.x&6),8); // 1,1,3,3      5,5,7,7
+      u= __shfl_sync(0xFFFFFFFF, (int)y[0],  (threadIdx.x&6),8); // 0,0,2,2      4,4,6,6
+      v= __shfl_sync(0xFFFFFFFF, (int)y[0],1+(threadIdx.x&6),8); // 1,1,3,3      5,5,7,7
       y[0] = ((threadIdx.x&1) < 1) ? (u+v) : (u-v);
     }
 
@@ -269,8 +269,8 @@ y[i] = EXTRA_REDUCE_S(y[i]); \
     // BUTTERFLY(12, 13, 0);
     // BUTTERFLY(14, 15, 0);
     {
-      u= __shfl((int)y[1],  (threadIdx.x&6),8); // 8,8,10,10    12,12,14,14
-      v= __shfl((int)y[1],1+(threadIdx.x&6),8); // 9,9,11,11    13,13,15,15
+      u= __shfl_sync(0xFFFFFFFF, (int)y[1],  (threadIdx.x&6),8); // 8,8,10,10    12,12,14,14
+      v= __shfl_sync(0xFFFFFFFF, (int)y[1],1+(threadIdx.x&6),8); // 9,9,11,11    13,13,15,15
       y[1] = ((threadIdx.x&1) < 1) ? (u+v) : (u-v);
     }
 
@@ -337,8 +337,8 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
   int expanded[32];
 #pragma unroll 4
   for (i=0; i < 4; i++) {
-      expanded[  i] = __byte_perm(__shfl((int)data[0], 2*i, 8), __shfl((int)data[0], (2*i)+1, 8), threadIdx.x&7)&0xff;
-      expanded[4+i] = __byte_perm(__shfl((int)data[1], 2*i, 8), __shfl((int)data[1], (2*i)+1, 8), threadIdx.x&7)&0xff;
+      expanded[  i] = __byte_perm(__shfl_sync(0xFFFFFFFF, (int)data[0], 2*i, 8), __shfl_sync(0xFFFFFFFF, (int)data[0], (2*i)+1, 8), threadIdx.x&7)&0xff;
+      expanded[4+i] = __byte_perm(__shfl_sync(0xFFFFFFFF, (int)data[1], 2*i, 8), __shfl_sync(0xFFFFFFFF, (int)data[1], (2*i)+1, 8), threadIdx.x&7)&0xff;
   }
 #pragma unroll 8
   for (i=8; i < 16; i++)
@@ -363,18 +363,18 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
   // 2 6 0 4
   const int perm0[8] = { 2,3,6,7,0,1,4,5 };  // TODO: das landet im lmem. doof.
 
-  P1 = expanded[ 0]; P2 = __shfl(expanded[ 2], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[16]; Q2 = __shfl(expanded[18], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
-  P1 = expanded[ 8]; P2 = __shfl(expanded[10], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[24]; Q2 = __shfl(expanded[26], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
-  P1 = expanded[ 4]; P2 = __shfl(expanded[ 6], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[20]; Q2 = __shfl(expanded[22], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2; 
-  vec0.z = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
-  P1 = expanded[12]; P2 = __shfl(expanded[14], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[28]; Q2 = __shfl(expanded[30], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
+  P1 = expanded[ 0]; P2 = __shfl_sync(0xFFFFFFFF, expanded[ 2], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[16]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[18], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
+  P1 = expanded[ 8]; P2 = __shfl_sync(0xFFFFFFFF, expanded[10], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[24]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[26], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
+  P1 = expanded[ 4]; P2 = __shfl_sync(0xFFFFFFFF, expanded[ 6], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[20]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[22], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2; 
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
+  P1 = expanded[12]; P2 = __shfl_sync(0xFFFFFFFF, expanded[14], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[28]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[30], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm0[threadIdx.x&7], 8);
   g_temp4[threadIdx.x&7] = vec0;
 
 //  1   9   5  13   3  11   7  15      17  25  21  29  19  27  23  31         6 6 6 6 6 6 6 6     6 6 6 6 6 6 6 6
@@ -385,18 +385,18 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
   // 6 2 4 0
   const int perm1[8] = { 6,7,2,3,4,5,0,1 };  // TODO: das landet im lmem. doof.
 
-  P1 = expanded[ 1]; P2 = __shfl(expanded[ 3], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[17]; Q2 = __shfl(expanded[19], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
-  P1 = expanded[ 9]; P2 = __shfl(expanded[11], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[25]; Q2 = __shfl(expanded[27], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
-  P1 = expanded[ 5]; P2 = __shfl(expanded[ 7], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[21]; Q2 = __shfl(expanded[23], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2; 
-  vec0.z = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
-  P1 = expanded[13]; P2 = __shfl(expanded[15], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
-  Q1 = expanded[29]; Q2 = __shfl(expanded[31], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
+  P1 = expanded[ 1]; P2 = __shfl_sync(0xFFFFFFFF, expanded[ 3], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[17]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[19], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
+  P1 = expanded[ 9]; P2 = __shfl_sync(0xFFFFFFFF, expanded[11], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[25]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[27], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
+  P1 = expanded[ 5]; P2 = __shfl_sync(0xFFFFFFFF, expanded[ 7], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[21]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[23], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2; 
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
+  P1 = expanded[13]; P2 = __shfl_sync(0xFFFFFFFF, expanded[15], (threadIdx.x-1)&7, 8); P = even ? P1 : P2;
+  Q1 = expanded[29]; Q2 = __shfl_sync(0xFFFFFFFF, expanded[31], (threadIdx.x-1)&7, 8); Q = even ? Q1 : Q2;
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm1[threadIdx.x&7], 8);
   g_temp4[8+(threadIdx.x&7)] = vec0;
 
 //  1   9   5  13   3  11   7  15      17  25  21  29  19  27  23  31         7 7 7 7 7 7 7 7     7 7 7 7 7 7 7 7
@@ -409,18 +409,18 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
 
   bool hi = (threadIdx.x&7)>=4;
 
-  P1 = hi?expanded[ 1]:expanded[ 0]; P2 = __shfl(hi?expanded[ 3]:expanded[ 2], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = hi?expanded[17]:expanded[16]; Q2 = __shfl(hi?expanded[19]:expanded[18], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
-  P1 = hi?expanded[ 9]:expanded[ 8]; P2 = __shfl(hi?expanded[11]:expanded[10], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = hi?expanded[25]:expanded[24]; Q2 = __shfl(hi?expanded[27]:expanded[26], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
-  P1 = hi?expanded[ 5]:expanded[ 4]; P2 = __shfl(hi?expanded[ 7]:expanded[ 6], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = hi?expanded[21]:expanded[20]; Q2 = __shfl(hi?expanded[23]:expanded[22], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2; 
-  vec0.z = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
-  P1 = hi?expanded[13]:expanded[12]; P2 = __shfl(hi?expanded[15]:expanded[14], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = hi?expanded[29]:expanded[28]; Q2 = __shfl(hi?expanded[31]:expanded[30], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
+  P1 = hi?expanded[ 1]:expanded[ 0]; P2 = __shfl_sync(0xFFFFFFFF, hi?expanded[ 3]:expanded[ 2], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = hi?expanded[17]:expanded[16]; Q2 = __shfl_sync(0xFFFFFFFF, hi?expanded[19]:expanded[18], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
+  P1 = hi?expanded[ 9]:expanded[ 8]; P2 = __shfl_sync(0xFFFFFFFF, hi?expanded[11]:expanded[10], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = hi?expanded[25]:expanded[24]; Q2 = __shfl_sync(0xFFFFFFFF, hi?expanded[27]:expanded[26], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
+  P1 = hi?expanded[ 5]:expanded[ 4]; P2 = __shfl_sync(0xFFFFFFFF, hi?expanded[ 7]:expanded[ 6], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = hi?expanded[21]:expanded[20]; Q2 = __shfl_sync(0xFFFFFFFF, hi?expanded[23]:expanded[22], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2; 
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
+  P1 = hi?expanded[13]:expanded[12]; P2 = __shfl_sync(0xFFFFFFFF, hi?expanded[15]:expanded[14], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = hi?expanded[29]:expanded[28]; Q2 = __shfl_sync(0xFFFFFFFF, hi?expanded[31]:expanded[30], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm2[threadIdx.x&7], 8);
   g_temp4[16+(threadIdx.x&7)] = vec0;
 
 //  1   9   5  13   3  11   7  15      17  25  21  29  19  27  23  31         1 1 1 1 1 1 1 1     1 1 1 1 1 1 1 1
@@ -433,18 +433,18 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
 
   bool lo = (threadIdx.x&7)<4;
 
-  P1 = lo?expanded[ 1]:expanded[ 0]; P2 = __shfl(lo?expanded[ 3]:expanded[ 2], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = lo?expanded[17]:expanded[16]; Q2 = __shfl(lo?expanded[19]:expanded[18], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
-  P1 = lo?expanded[ 9]:expanded[ 8]; P2 = __shfl(lo?expanded[11]:expanded[10], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = lo?expanded[25]:expanded[24]; Q2 = __shfl(lo?expanded[27]:expanded[26], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
-  P1 = lo?expanded[ 5]:expanded[ 4]; P2 = __shfl(lo?expanded[ 7]:expanded[ 6], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = lo?expanded[21]:expanded[20]; Q2 = __shfl(lo?expanded[23]:expanded[22], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2; 
-  vec0.z = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
-  P1 = lo?expanded[13]:expanded[12]; P2 = __shfl(lo?expanded[15]:expanded[14], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
-  Q1 = lo?expanded[29]:expanded[28]; Q2 = __shfl(lo?expanded[31]:expanded[30], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
+  P1 = lo?expanded[ 1]:expanded[ 0]; P2 = __shfl_sync(0xFFFFFFFF, lo?expanded[ 3]:expanded[ 2], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = lo?expanded[17]:expanded[16]; Q2 = __shfl_sync(0xFFFFFFFF, lo?expanded[19]:expanded[18], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
+  P1 = lo?expanded[ 9]:expanded[ 8]; P2 = __shfl_sync(0xFFFFFFFF, lo?expanded[11]:expanded[10], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = lo?expanded[25]:expanded[24]; Q2 = __shfl_sync(0xFFFFFFFF, lo?expanded[27]:expanded[26], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
+  P1 = lo?expanded[ 5]:expanded[ 4]; P2 = __shfl_sync(0xFFFFFFFF, lo?expanded[ 7]:expanded[ 6], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = lo?expanded[21]:expanded[20]; Q2 = __shfl_sync(0xFFFFFFFF, lo?expanded[23]:expanded[22], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2; 
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
+  P1 = lo?expanded[13]:expanded[12]; P2 = __shfl_sync(0xFFFFFFFF, lo?expanded[15]:expanded[14], (threadIdx.x+1)&7, 8); P = !even ? P1 : P2;
+  Q1 = lo?expanded[29]:expanded[28]; Q2 = __shfl_sync(0xFFFFFFFF, lo?expanded[31]:expanded[30], (threadIdx.x+1)&7, 8); Q = !even ? Q1 : Q2;
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_185(P),  mul_185(Q) , 0x5410), perm3[threadIdx.x&7], 8);
   g_temp4[24+(threadIdx.x&7)] = vec0;
 
 //  1   9   5  13   3  11   7  15       1   9   5  13   3  11   7  15         0 0 0 0 0 0 0 0     1 1 1 1 1 1 1 1
@@ -461,22 +461,22 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
 
   bool sel = ((threadIdx.x+2)&7) >= 4;  // 2,3,4,5
 
-  P1 = sel?expanded[0]:expanded[1]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[2]:expanded[3]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  P1 = sel?expanded[0]:expanded[1]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[2]:expanded[3]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
-  P1 = sel?expanded[8]:expanded[9]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[10]:expanded[11]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
+  P1 = sel?expanded[8]:expanded[9]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[10]:expanded[11]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
-  P1 = sel?expanded[4]:expanded[5]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[6]:expanded[7]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
+  P1 = sel?expanded[4]:expanded[5]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[6]:expanded[7]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.z = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
-  P1 = sel?expanded[12]:expanded[13]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[14]:expanded[15]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
+  P1 = sel?expanded[12]:expanded[13]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[14]:expanded[15]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm4[threadIdx.x&7], 8);
 
   g_temp4[32+(threadIdx.x&7)] = vec0;
 
@@ -487,22 +487,22 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
 
   const int perm5[8] = { 6,7,2,3,0,1,4,5 };  // TODO: das landet im lmem. doof.
 
-  P1 = sel?expanded[1]:expanded[0]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[3]:expanded[2]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  P1 = sel?expanded[1]:expanded[0]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[3]:expanded[2]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
-  P1 = sel?expanded[9]:expanded[8]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[11]:expanded[10]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
+  P1 = sel?expanded[9]:expanded[8]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[11]:expanded[10]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
-  P1 = sel?expanded[5]:expanded[4]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[7]:expanded[6]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
+  P1 = sel?expanded[5]:expanded[4]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[7]:expanded[6]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.z = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
-  P1 = sel?expanded[13]:expanded[12]; Q1 = __shfl(P1, threadIdx.x^1, 8);      
-  Q2 = sel?expanded[15]:expanded[14]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
+  P1 = sel?expanded[13]:expanded[12]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);      
+  Q2 = sel?expanded[15]:expanded[14]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm5[threadIdx.x&7], 8);
 
   g_temp4[40+(threadIdx.x&7)] = vec0;
 
@@ -515,22 +515,22 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
   // sel markiert threads 2,3,4,5
 
   int t;
-  t = __shfl(expanded[17],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[16]; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[19],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[18]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[17],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[16]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[19],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[18]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
-  t = __shfl(expanded[25],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[24]; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[27],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[26]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[25],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[24]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[27],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[26]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
-  t = __shfl(expanded[21],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[20]; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[23],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[22]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[21],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[20]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[23],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[22]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.z = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
-  t = __shfl(expanded[29],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[28]; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[31],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[30]; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[29],(threadIdx.x+4)&7,8); P1 = sel?t:expanded[28]; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[31],(threadIdx.x+4)&7,8); Q2 = sel?t:expanded[30]; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm6[threadIdx.x&7], 8);
 
   g_temp4[48+(threadIdx.x&7)] = vec0;
 
@@ -542,22 +542,22 @@ __device__ __forceinline__ void Expansion(const uint32_t *data, uint4 *g_temp4)
   const int perm7[8] = { 4,5,2,3,6,7,0,1 };  // TODO: das landet im lmem. doof.
   // sel markiert threads 2,3,4,5
 
-  t = __shfl(expanded[16],(threadIdx.x+4)&7,8); P1 = sel?expanded[17]:t; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[18],(threadIdx.x+4)&7,8); Q2 = sel?expanded[19]:t; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[16],(threadIdx.x+4)&7,8); P1 = sel?expanded[17]:t; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[18],(threadIdx.x+4)&7,8); Q2 = sel?expanded[19]:t; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.x = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
-  t = __shfl(expanded[24],(threadIdx.x+4)&7,8); P1 = sel?expanded[25]:t; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[26],(threadIdx.x+4)&7,8); Q2 = sel?expanded[27]:t; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.x = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[24],(threadIdx.x+4)&7,8); P1 = sel?expanded[25]:t; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[26],(threadIdx.x+4)&7,8); Q2 = sel?expanded[27]:t; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.y = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
-  t = __shfl(expanded[20],(threadIdx.x+4)&7,8); P1 = sel?expanded[21]:t; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[22],(threadIdx.x+4)&7,8); Q2 = sel?expanded[23]:t; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.y = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[20],(threadIdx.x+4)&7,8); P1 = sel?expanded[21]:t; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[22],(threadIdx.x+4)&7,8); Q2 = sel?expanded[23]:t; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.z = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
-  t = __shfl(expanded[28],(threadIdx.x+4)&7,8); P1 = sel?expanded[29]:t; Q1 = __shfl(P1, threadIdx.x^1, 8);
-  t = __shfl(expanded[30],(threadIdx.x+4)&7,8); Q2 = sel?expanded[31]:t; P2 = __shfl(Q2, threadIdx.x^1, 8);
+  vec0.z = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[28],(threadIdx.x+4)&7,8); P1 = sel?expanded[29]:t; Q1 = __shfl_sync(0xFFFFFFFF, P1, threadIdx.x^1, 8);
+  t = __shfl_sync(0xFFFFFFFF, expanded[30],(threadIdx.x+4)&7,8); Q2 = sel?expanded[31]:t; P2 = __shfl_sync(0xFFFFFFFF, Q2, threadIdx.x^1, 8);
   P = even? P1 : P2; Q = even? Q1 : Q2;
-  vec0.w = __shfl((int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
+  vec0.w = __shfl_sync(0xFFFFFFFF, (int)__byte_perm(mul_233(P),  mul_233(Q) , 0x5410), perm7[threadIdx.x&7], 8);
 
   g_temp4[56+(threadIdx.x&7)] = vec0;
 
@@ -670,7 +670,7 @@ __host__ void x11_simd512_cpu_hash_64(int thr_id, int threads, uint32_t startNou
 {
     const int threadsperblock = TPB;
 
-    // Grí¼ºí³ des dynamischen Shared Memory Bereichs
+    // Grï¿½ï¿½ï¿½ï¿½ï¿½ï¿½des dynamischen Shared Memory Bereichs
     size_t shared_size = 0;
 
     // berechne wie viele Thread Blocks wir brauchen
@@ -681,7 +681,7 @@ __host__ void x11_simd512_cpu_hash_64(int thr_id, int threads, uint32_t startNou
 
     dim3 grid((threads + threadsperblock-1)/threadsperblock);
 
-    // knstlich die Occupancy limitieren, um das totale Erschíµ¾íµ¥n des Texture Cache zu vermeiden
+    // knstlich die Occupancy limitieren, um das totale Erschï¿½ï¿½ï¿½ï¿½ï¿½ï¿½n des Texture Cache zu vermeiden
     x11_simd512_gpu_compress1_64<<<grid, block, shared_size>>>(threads, startNounce, (uint64_t*)d_hash, d_nonceVector, d_temp4[thr_id], d_state[thr_id]);
     x11_simd512_gpu_compress2_64<<<grid, block, shared_size>>>(threads, startNounce, (uint64_t*)d_hash, d_nonceVector, d_temp4[thr_id], d_state[thr_id]);
 
